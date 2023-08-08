@@ -11,14 +11,12 @@ if (isset($_POST['submit'])) {
         $fileType = pathinfo($fileName, PATHINFO_EXTENSION);
 
         // Allow certain file formats
-        $allowTypes = array('pdf');
+        $allowTypes = array('pdf','docx','doc');
         if (in_array($fileType, $allowTypes)) {
             // Include autoloader file
             include 'vendor/autoload.php';
-
             // Initialize and load PDF Parser library
             $parser = new \Smalot\PdfParser\Parser();
-
             // Source PDF file to extract text
             $file = $_FILES["pdf_file"]["tmp_name"];
 
@@ -30,33 +28,44 @@ if (isset($_POST['submit'])) {
 
             // Add line break
             $pdfText = nl2br($text);
-
-            // Define a regular expression pattern to match the table format
-            $pattern = '/\bname\b\s+\bemail\b\s+\bphone\b\s+\baddress\b\s+.*?\s+(.*?@.*?)\s+.*?\s+(.*?)\s+(.*?)\s*$/ms';
-
-            // Use preg_match_all to find all occurrences of the pattern in the extracted text
-            if (preg_match_all($pattern, $pdfText, $matches, PREG_SET_ORDER)) {
-                foreach ($matches as $match) {
-                    // Extract the details from the captured groups
-                    $name = $match[1];
-                    $email = $match[2];
-                    $phone = $match[3];
-                    $address = $match[4];
-
-                    // Add the extracted data to the tableData array
-                    $tableData[] = array(
-                        'name' => $name,
-                        'email' => $email,
-                        'phone' => $phone,
-                        'address' => $address
-                    );
-                }
-            }
         } else {
             $statusMsg = '<p>Sorry, only PDF file is allowed to upload.</p>';
         }
     } else {
         $statusMsg = '<p>Please select a PDF file to extract text.</p>';
+    }
+}
+
+// Process the table data and organize it back into columns
+if (!empty($pdfText)) {
+    // Explode the text by lines
+    $lines = explode('<br />', $pdfText);
+
+    // Check if the first line contains headers
+    $headerLine = $lines[0];
+    if (strpos($headerLine, 'Name') !== false && strpos($headerLine, 'Email') !== false && strpos($headerLine, 'Pho') !== false && strpos($headerLine, 'Address') !== false) {
+        // Skip the first line (header) and process the rest
+        for ($i = 1; $i < count($lines); $i++) {
+            $line = $lines[$i];
+            // Split the line by spaces
+            $data = preg_split('/\s+/', $line, -1, PREG_SPLIT_NO_EMPTY);
+            if (count($data) === 4) {
+                $name = $data[0];
+                $email = $data[1];
+                $phone = $data[2];
+                $address = $data[3];
+
+                // Add the extracted data to the tableData array
+                $tableData[] = array(
+                    'name' => $name,
+                    'email' => $email,
+                    'phone' => $phone,
+                    'address' => $address
+                );
+            }
+        }
+    } else {
+        $statusMsg = '<p>No table data found in the PDF.</p>';
     }
 }
 
@@ -69,6 +78,6 @@ if (!empty($tableData)) {
     }
     echo '</table>';
 } else {
-    echo "No table data found in the PDF.";
+    echo $statusMsg;
 }
 ?>

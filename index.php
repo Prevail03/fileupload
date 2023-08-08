@@ -1,4 +1,4 @@
-<form action="submit.php" method="post" enctype="multipart/form-data">
+<form action="original.php" method="post" enctype="multipart/form-data">
     <div class="form-input">
         <label for="pdf_file">PDF File</label>
         <input type="file" name="pdf_file" placeholder="Select a PDF file" required="">

@@ -8,7 +8,7 @@ if(isset($_POST['submit'])){
         $fileType = pathinfo($fileName, PATHINFO_EXTENSION); 
          
         // Allow certain file formats 
-        $allowTypes = array('pdf'); 
+        $allowTypes = array('pdf','docx','doc'); 
         if(in_array($fileType, $allowTypes)){ 
             // Include autoloader file 
             include 'vendor/autoload.php'; 

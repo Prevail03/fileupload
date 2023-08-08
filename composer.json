@@ -1,5 +1,7 @@
 {
     "require": {
-        "smalot/pdfparser": "^2.5"
+        "smalot/pdfparser": "^2.5",
+        "ottosmops/pdftotext": "^2.0",
+        "tecnickcom/tcpdf": "^6.6"
     }
 }

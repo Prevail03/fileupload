@@ -7,4 +7,6 @@ $baseDir = dirname($vendorDir);
 
 return array(
     'Symfony\\Polyfill\\Mbstring\\' => array($vendorDir . '/symfony/polyfill-mbstring'),
+    'Symfony\\Component\\Process\\' => array($vendorDir . '/symfony/process'),
+    'Ottosmops\\Pdftotext\\' => array($vendorDir . '/ottosmops/pdftotext/src'),
 );
