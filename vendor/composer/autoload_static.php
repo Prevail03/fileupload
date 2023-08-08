@@ -69,6 +69,13 @@ class ComposerStaticInit263d561916a9e4fdb14f5c563f9afc97
                 0 => __DIR__ . '/..' . '/smalot/pdfparser/src',
             ),
         ),
+        'P' => 
+        array (
+            'PHPExcel' => 
+            array (
+                0 => __DIR__ . '/..' . '/phpoffice/phpexcel/Classes',
+            ),
+        ),
     );
 
     public static $classMap = array (

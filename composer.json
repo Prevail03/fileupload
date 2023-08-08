@@ -4,6 +4,7 @@
         "ottosmops/pdftotext": "^2.0",
         "tecnickcom/tcpdf": "^6.6",
         "phpoffice/phpword": "^1.1",
-        "thiagoalessio/tesseract_ocr": "^2.12"
+        "thiagoalessio/tesseract_ocr": "^2.12",
+        "phpoffice/phpexcel": "^1.8"
     }
 }
