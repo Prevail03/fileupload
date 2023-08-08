@@ -11,18 +11,34 @@ class ComposerStaticInit263d561916a9e4fdb14f5c563f9afc97
     );
 
     public static $prefixLengthsPsr4 = array (
+        't' => 
+        array (
+            'thiagoalessio\\TesseractOCR\\' => 27,
+        ),
         'S' => 
         array (
             'Symfony\\Polyfill\\Mbstring\\' => 26,
             'Symfony\\Component\\Process\\' => 26,
         ),
+        'P' => 
+        array (
+            'PhpOffice\\PhpWord\\' => 18,
+        ),
         'O' => 
         array (
             'Ottosmops\\Pdftotext\\' => 20,
         ),
+        'L' => 
+        array (
+            'Laminas\\Escaper\\' => 16,
+        ),
     );
 
     public static $prefixDirsPsr4 = array (
+        'thiagoalessio\\TesseractOCR\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/thiagoalessio/tesseract_ocr/src',
+        ),
         'Symfony\\Polyfill\\Mbstring\\' => 
         array (
             0 => __DIR__ . '/..' . '/symfony/polyfill-mbstring',
@@ -31,9 +47,17 @@ class ComposerStaticInit263d561916a9e4fdb14f5c563f9afc97
         array (
             0 => __DIR__ . '/..' . '/symfony/process',
         ),
+        'PhpOffice\\PhpWord\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/phpoffice/phpword/src/PhpWord',
+        ),
         'Ottosmops\\Pdftotext\\' => 
         array (
             0 => __DIR__ . '/..' . '/ottosmops/pdftotext/src',
+        ),
+        'Laminas\\Escaper\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/laminas/laminas-escaper/src',
         ),
     );
 

@@ -6,7 +6,10 @@ $vendorDir = dirname(__DIR__);
 $baseDir = dirname($vendorDir);
 
 return array(
+    'thiagoalessio\\TesseractOCR\\' => array($vendorDir . '/thiagoalessio/tesseract_ocr/src'),
     'Symfony\\Polyfill\\Mbstring\\' => array($vendorDir . '/symfony/polyfill-mbstring'),
     'Symfony\\Component\\Process\\' => array($vendorDir . '/symfony/process'),
+    'PhpOffice\\PhpWord\\' => array($vendorDir . '/phpoffice/phpword/src/PhpWord'),
     'Ottosmops\\Pdftotext\\' => array($vendorDir . '/ottosmops/pdftotext/src'),
+    'Laminas\\Escaper\\' => array($vendorDir . '/laminas/laminas-escaper/src'),
 );
