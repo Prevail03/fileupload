@@ -1,6 +1,10 @@
 <?php
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 require 'vendor/autoload.php'; // Include the Composer autoloader
-require 'Includes/Connection.php'; // Include the database connection
+require('../commons/config/settings.php'); 
+$conn = sqlsrv_connect( Settings::$serverName, Settings::$connectionInfo);
 
 use PhpOffice\PhpSpreadsheet\IOFactory;
 
@@ -16,7 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $worksheet = $spreadsheet->getActiveSheet();
         
         // Prepare the SQL INSERT query
-        $insertQuery = "INSERT INTO aar_insurance (date, description, withdrawal, deposit, balance) VALUES (?, ?, ?, ?, ?)";
+        $insertQuery = "INSERT INTO BankTransactions (bankDetailsID, accountNumber, accountName, address, currency, date, description, withdrawal, deposit, balance) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         
         // Prepare the statement
         $stmt = $conn->prepare($insertQuery);
@@ -28,14 +32,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
               $rowData[] = $cell->getValue(); // Extract cell values
             }
             // Convert Excel numeric date to human-readable date
-            $date = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($rowData[0]);
+            $bankDetailsID=bin2hex(random_bytes(6));
+            $accountNumber = $rowData[0];
+            $accountName = $rowData[1];
+            $address = $rowData[2];
+            $currency = $rowData[3];
+            $date = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($rowData[4]);
             $dateFormatted = $date->format('Y-m-d');
-            $description = $rowData[1];
-            $withdrawal = $rowData[2];
-            $deposit = $rowData[3];
-            $balance = $rowData[4];
+            $description = $rowData[5];
+            $withdrawal = $rowData[6];
+            $deposit = $rowData[7];
+            $balance = $rowData[8];
 
-            $stmt->bind_param("ssdds", $dateFormatted, $description, $withdrawal, $deposit, $balance);
+            $stmt->bind_param("sssssssdds", $bankDetailsID, $accountNumber, $accountName, $address, $currency, $dateFormatted, $description, $withdrawal, $deposit, $balance);
             $stmt->execute();
         }
         echo "Data inserted successfully!";
@@ -58,7 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <body>
     <h1>Form Upload</h1>
    
-    <form action="excelInsert.php" method="post" enctype="multipart/form-data">
+    <form action="importBankDetails.php" method="post" enctype="multipart/form-data">
       <div class="input-group mb-3">
         <label class="input-group-text" for="inputGroupFile01">Upload</label>
         <input type="file" name="file" class="form-control" id="inputGroupFile01" required>
