@@ -86,45 +86,32 @@ if($_SESSION['user_folder'] !== Settings::$folder){
                 <div class="modal-body">
                     <div id="transactionType">
                       <div class="form-group">
-                        <label for="name">Transaction to be split:</label>
+                        <label for="name">Transaction Type:</label>
                         <select id="transactionType" name="transactionType">
                           <option value="deposit">Deposit</option>
                           <option value="withdrawal">Withdrawal</option>
                         </select>
                       </div>
                     </div>
-                    <div id="accountCode">
-                      <label for="name">Account Name:</label>
-                      <select name="selectedAccount" id="selectedAccount" required>
-                        <option value="">Select Account</option>
+                    <div id = "accountCode">
+                      <label for="name">Acount Code:</label>
+                      <select name="accountCode" id="accountCode" required>
                         <?php
                           $schemeCode = $_SESSION["scheme_code"];
                           $sqlAccounts = "SELECT * FROM coa_tb WHERE coa_scheme_code LIKE ? ORDER BY coa_account_code";
                           $paramsAccounts = array($schemeCode);
-                          $stmtAccounts = sqlsrv_query($conn, $sqlAccounts, $paramsAccounts);
-                          if ($stmtAccounts === false) {
-                              die(print_r(sqlsrv_errors(), true));
+                          $stmtAccounts = sqlsrv_query( $conn, $sqlAccounts,$paramsAccounts);
+                          if( $stmtAccounts === false) {
+                              die( print_r( sqlsrv_errors(), true) );
                           }
                           $counting = 1;
-
-                          // Check if selectedAccount is set in POST
-                          while ($rowAccounts = sqlsrv_fetch_array($stmtAccounts, SQLSRV_FETCH_ASSOC)) {
+                          echo "<option >Select Account</option>";
+                          while( $rowAccounts = sqlsrv_fetch_array( $stmtAccounts, SQLSRV_FETCH_ASSOC) ) {
                             $accountCode = $rowAccounts['coa_account_code'];
-                            $name = $rowAccounts['coa_account_name'];                           
-                            // Check if the current option matches the selected value
-                            $selected = ($selectedAccount == "$accountCode|$name") ? 'selected' : '';
+                            $name = $rowAccounts['coa_account_name'];
                             echo "<option value='$accountCode'>$name</option>";
                           }
                         ?>
-                      </select>
-                    </div>
-
-                    <div class="form-group">
-                      <label for="name">Transaction Type:</label>
-                      <select id="splitType" name="splitType[]">
-                        <option >Select</option>
-                        <option value="credit">Credit</option>
-                        <option value="debit">Debit</option>
                       </select>
                     </div>
 
@@ -133,7 +120,14 @@ if($_SESSION['user_folder'] !== Settings::$folder){
                           <label for="name">Amount:</label>
                           <input type="number" class="form-control amount-input" name="amount[]" placeholder="Amount" required>
                       </div>
-                      
+                      <div class="form-group">
+                        <label for="name">Split Type:</label>
+                        <select id="splitType" name="splitType[]">
+                          <option >Select</option>
+                          <option value="credit">Credit</option>
+                          <option value="debit">Debit</option>
+                        </select>
+                      </div>
                     </div>
                     <button type="button" class="btn btn-success" id="addAmount">Add</button>
                 </div>
@@ -149,19 +143,17 @@ if($_SESSION['user_folder'] !== Settings::$folder){
 <script>
 $(document).ready(function () {
     $('#addAmount').on('click', function () {
-        var newField = $(
-              '<label for="name">Transaction Type:</label>' +
+        var newField = $('<div class="form-group">' +
+            '<label for="name">Amount:</label>' +
+            '<input type="number" class="form-control amount-input" name="amount[]" placeholder="Amount" required></br>' +
+            '<div class="form-group">' +
+              '<label for="name">Split Type:</label>' +
               '<select id="splitType" name="splitType[]">' +
                 '<option >Select</option>'  +
                 '<option value="credit">Credit</option>'  +
                 '<option value="debit">Debit</option>' +
               '</select>' +
-            '</div>' +'</br>'+
-            '<div class="form-group">' +
-            '<label for="name">Amount:</label>' +
-            '<input type="number" class="form-control amount-input" name="amount[]" placeholder="Amount" required></br>' +
-            '<div class="form-group">' +
-              
+            '</div>' +
             '<button type="button" class="btn btn-danger remove-amount">Remove</button>' +
             '</div>');
         $('#amountFields').append(newField);
@@ -223,7 +215,6 @@ $(document).ready(function () {
           <div class="col-12">
 
             <!-- /.card -->
-            <a class="btn btn-primary" href="home.php" role="button">Dashboard</a>
             <ul class="nav nav-tabs" id="myTabs" role="tablist">
               <li class="nav-item">
                   <a class="nav-link active" id="imported-tab" data-toggle="tab" href="#imported" role="tab" aria-controls="imported" aria-selected="true">Imported Transactions</a>
@@ -255,8 +246,6 @@ $(document).ready(function () {
                         <th>Description</th>
                         <th>Withdrawal</th>
                         <th>Deposit</th>
-                        <th>Select</th>
-                        <th>Account Name</th>
                         <th>Action</th>
                       </tr>
                       </thead>
@@ -281,28 +270,6 @@ $(document).ready(function () {
                             <td><?php echo $row['description']?></td>
                             <td><?php echo $row['withdrawal']?></td>
                             <td><?php echo $row['deposit']?></td>
-                            <td><input type="checkbox" name="selectedRows[]" value="<?php echo $row['detailsInsertID']; ?>"></td>
-                            <td>
-                              <form action = "submitBankDetails.php" method = "GET">
-                                <select name="selectedAccount" id="accountCode"> 
-                                  <?php
-                                    $sqlAccounts = "SELECT * FROM coa_tb WHERE coa_scheme_code LIKE ? ORDER BY coa_account_code";
-                                    $paramsAccounts = array($schemeCode);
-                                    $stmtAccounts = sqlsrv_query( $conn, $sqlAccounts,$paramsAccounts);
-                                    if( $stmtAccounts === false) {
-                                        die( print_r( sqlsrv_errors(), true) );
-                                    }
-                                    $counting = 1;
-                                    echo "<option >Select Account</option>";
-                                    while( $rowAccounts = sqlsrv_fetch_array( $stmtAccounts, SQLSRV_FETCH_ASSOC) ) {
-                                      $accountCode = $rowAccounts['coa_account_code'];
-                                      $name = $rowAccounts['coa_account_name'];
-                                      echo "<option value='$accountCode'>$name</option>";
-                                    }
-                                  ?>
-                                </select>
-                              </form>                            
-                            </td>
                             <td>
                             <?php
                               $withdrawal = $row['withdrawal'];
@@ -310,9 +277,9 @@ $(document).ready(function () {
                               $value = 0;
                               
                               if ($withdrawal > 0) {
-                                $value = $withdrawal;
+                                  $value = $withdrawal;
                               } else if ($deposit > 0) { // Adjusted condition here
-                                $value = $deposit;
+                                  $value = $deposit;
                               }
                             ?>
                             <div class="btn-group">
@@ -336,14 +303,10 @@ $(document).ready(function () {
                         <th>Description</th>
                         <th>Withdrawal</th>
                         <th>Deposit</th>
-                        <th>Acoount Name</th>
-                        <th>Select</th>
                         <th>Action</th>
                       </tr>
                       </tfoot>
                     </table>
-                    <button type="button" id="bulkSubmitButton" class="btn btn-primary">Bulk Submit</button>
-
                   </div>
                   <!-- /.card-body -->
                 </div>
@@ -388,7 +351,6 @@ $(document).ready(function () {
                           <td><?php echo date_format($row['date'], "Y-m-d") ?></td>
                           <td><?php echo $row['description']?></td>
                           <td><?php echo $row['amount']?></td>
-                          
                           <td>
                           <div class="btn-group">
                             <a class="btn btn-success" href="submitBankDetails.php?id=<?php echo $row["detailsInsertID"]; ?>" role="button">Submit</a>
@@ -428,25 +390,6 @@ $(document).ready(function () {
     <!-- /.content -->
   </div>
   <!-- /.content-wrapper -->
-<script>
-  $(document).ready(function () {
-    $("#bulkSubmitButton").click(function () {
-        var selectedRows = $("input[name='selectedRows[]']:checked").map(function () {
-            return this.value;
-        }).get();
-
-        if (selectedRows.length > 0) {
-            // Send the selected rows to your PHP script for processing
-            $.post("bulkSubmit.php", { selectedRows: selectedRows }, function (response) {
-                // Handle the response from the server
-                alert(response);
-            });
-        } else {
-            alert("Please select at least one row to submit.");
-        }
-    });
-});
-</script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>

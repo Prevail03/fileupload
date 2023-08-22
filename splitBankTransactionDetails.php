@@ -22,10 +22,7 @@ if($_SESSION['user_folder'] !== Settings::$folder){
 	exit("Folder inaccessible");
 }
 ?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <title>Accounts Module</title>
+
   <meta charset="utf-8">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -35,108 +32,16 @@ if($_SESSION['user_folder'] !== Settings::$folder){
   <script src="../commons/js/popper.min.js"></script>
   <script src="../commons/bootstrap/js/bootstrap.min.js"></script>
   <link rel="icon" type="image/ico" href="../commons/images/favicon.ico">
-  <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"> -->
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
   <!-- Font Awesome -->
   <link rel="stylesheet" href="tables/plugins/fontawesome-free/css/all.min.css">
   <!-- DataTables -->
   <link rel="stylesheet" href="tables/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css">
   <link rel="stylesheet" href="tables/plugins/datatables-responsive/css/responsive.bootstrap4.min.css">
   <link rel="stylesheet" href="tables/plugins/datatables-buttons/css/buttons.bootstrap4.min.css">
-</head>
-<body>
-    <div class="container-fluid sticky-top" style="background-color: #eee;">
-      <div class="row">
-        <div class="col-sm-4">
-          <img src="../commons/images/Octagon_logo.png" width="300" height="100"/>
-        </div>
-        <div class="col-sm-8">
-          <h2><?php echo($_SESSION['scheme_code'].": ".$_SESSION['scheme_name']); ?></h2>
-          <h3>Accounts: Home</h3>
-        </div>
-      </div>
-      
-      <div class="row">
-        <div class="col-sm-12">
-          <?php 
-            print_menu(array("menu-pos"=>"z", "sub-menu-pos"=>"z1"));
-          ?>
-        </div>
-      </div>
-      
-    </div>
 
-    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-      <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title" id="myModalLabel">Split Transactions</h4>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-              <!-- Value: <span id="modalValue"></span> -->
-              </div>
-            <form method="post" action="splitBankTransactions.php">
-            <input type="hidden" id="modalValueInput" name="insertID">
-                <div class="modal-body">
-                    <div id="transactionType">
-                      <div class="form-group">
-                        <label for="name">Transaction Type:</label>
-                        <select id="transactionType" name="transactionType">
-                          <option value="deposit">Deposit</option>
-                          <option value="withdrawal">Withdrawal</option>
-                        </select>
-                      </div>
-                    </div>
-                    <div id="amountFields">
-                      <div class="form-group">
-                        <label for="name">Amount:</label>
-                        <input type="number" class="form-control" name="amount[]" placeholder="Amount">
-                      </div>
-                    </div>
-                    <button type="button" class="btn btn-success" id="addAmount">Add Fileds</button>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-primary">Save changes</button>
-                </div>
-            </form>
-        </div>
-      </div>
-    </div>
-    <script>
-        $(document).ready(function () {
-            var amountFields = $('#amountFields');
-            
-            $('#addAmount').on('click', function () {
-                var newField = $('<div class="form-group">' +
-                                    '<label for="name">Amount:</label>' +
-                                    '<input type="number" class="form-control" name="amount[]" placeholder="Amount"></br>' +
-                                    '<button type="button" class="btn btn-danger remove-amount">Remove</button>' +
-                                '</div>');
-                amountFields.append(newField);
-            });
 
-            amountFields.on('click', '.remove-amount', function () {
-                $(this).parent().remove();
-            });
-        });
-        $('#myModal').on('show.bs.modal', function (event) {
-        var button = $(event.relatedTarget); // Button that triggered the modal
-        var value = button.data('value'); // Extract value from data-* attributes
-        var modal = $(this);
 
-        // Update modal content with the passed value
-        modal.find('#modalValue').text(value);
-        
-        // Set the value in the hidden input field
-        modal.find('#modalValueInput').val(value);
-        });
-    </script>
+    
     <!-- Content Wrapper. Contains page content -->
   <div class="content-wrapper">
     <!-- Content Header (Page header) -->
@@ -148,7 +53,6 @@ if($_SESSION['user_folder'] !== Settings::$folder){
           <div class="col-12">
 
             <!-- /.card -->
-            
             <div class="card">
               <div class="card-header">
                 <h3 class="card-title">Split Bank Transactions</h3>
@@ -178,7 +82,7 @@ if($_SESSION['user_folder'] !== Settings::$folder){
                   <tbody>
                   <?php
                     $schemeCode = $_SESSION['scheme_code'];
-                    $sql = "SELECT *, s.transactionType As transaction_type FROM BankTransactions b, split_bank_transactions_tb s WHERE b.schemeCode= 'TEST' and b.detailsInsertID = s.detailsInsertID  and b.submisionStatus  like '%Submitted%' ORDER BY b.detailsInsertID ASC, createdAT ASC";
+                    $sql = "SELECT *, s.transactionType As transaction_type FROM BankTransactions b, split_bank_transactions_tb s WHERE b.schemeCode= ? and b.detailsInsertID = s.detailsInsertID  and b.submisionStatus  like '%Submitted%' ORDER BY b.detailsInsertID ASC, s.createdAT ASC";
                     $params = array($schemeCode);
                     $stmt = sqlsrv_query( $conn, $sql,$params);
                     if( $stmt === false) {
@@ -305,5 +209,4 @@ if($_SESSION['user_folder'] !== Settings::$folder){
     });
   });
 </script>
-  </body>
-</html>
+  

@@ -3,6 +3,7 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 require('../commons/config/settings.php'); 
+date_default_timezone_set('Africa/Nairobi');
 $conn = sqlsrv_connect( Settings::$serverName, Settings::$connectionInfo);
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $detailsInsertID =  $_POST['insertID'];
@@ -43,45 +44,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           }else{
             $difference = $withdrawnAmount - $totalAmount;
             if ($difference == 0) {
-                $sqlInsert = "INSERT INTO split_bank_transactions_tb (transactionType, amount, detailsInsertID) VALUES (?, ?, ?)";
-                foreach ($_POST['amount'] as $amount) {
-                    $paramsInsert = array($transactionType, $amount, $detailsInsertID);
-                    $stmtInsert = sqlsrv_query($conn, $sqlInsert, $paramsInsert);
+              $sqlInsert = "INSERT INTO split_bank_transactions_tb (transactionType, splitType, amount, detailsInsertID, accountCode, splitID, createdAt, accountDescription) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+              $splitTypes = $_POST['splitType']; // Assuming this is the array of split types
+              $amounts = $_POST['amount'];
+              $createdAt = date("Y-m-d H:i:s"); 
+              $splitID=bin2hex(random_bytes(6)); //to record amountsThat were splitedAt the same time  same as detailsinsertID
+              for ($i = 0; $i < count($amounts); $i++) {
+                $splitType = $splitTypes[$i];
+                $amount = $amounts[$i];
+                $selectedAccount = $_POST['selectedAccount'][$i]; // Access the selectedAccount corresponding to this split
 
-                    if ($stmtInsert === false) {
-                        echo "Query: $sqlInsert<br>";  // Print the query for debugging
-                        die(print_r(sqlsrv_errors(), true));
-                    }
+                // Split the selected value into accountCode and accountDescription
+                list($accountCode, $accountDescription) = explode('|', $selectedAccount);
+
+                $paramsInsert = array($transactionType, $splitType, $amount, $detailsInsertID, $accountCode, $splitID, $createdAt, $accountDescription);
+
+                $stmtInsert = sqlsrv_query($conn, $sqlInsert, $paramsInsert);
+                if ($stmtInsert === false) {
+                    echo "Query: $sqlInsert<br>";  // Print the query for debugging
+                    die(print_r(sqlsrv_errors(), true));
                 }
-                echo "
-                <script>
-                    var confirmResult = confirm('Transaction Split Successful');
-                    if (confirmResult) {
-                        window.location.href = 'importedBankDetails.php?success=true';
-                    }
-                </script>";
-            } else {
-                // Add the difference to the amounts array
-                $_POST['amount'][] = $difference;
-
-                $sqlInsert = "INSERT INTO split_bank_transactions_tb (transactionType, amount, detailsInsertID) VALUES (?, ?, ?)";
-                foreach ($_POST['amount'] as $amount) {
-                    $paramsInsert = array($transactionType, $amount, $detailsInsertID);
-                    $stmtInsert = sqlsrv_query($conn, $sqlInsert, $paramsInsert);
-
-                    if ($stmtInsert === false) {
-                        echo "Query: $sqlInsert<br>";  // Print the query for debugging
-                        die(print_r(sqlsrv_errors(), true));
-                    }
-                }
-                echo "
-                <script>
-                    var confirmResult = confirm('Transaction Split Successful');
-                    if (confirmResult) {
-                        window.location.href = 'importedBankDetails.php?success=true';
-                    }
-                </script>";
-            }
+              }
+              echo "
+              <script>
+                  var confirmResult = confirm('Transaction Split Successful');
+                  if (confirmResult) {
+                      window.location.href = 'importedBankDetails.php?success=true';
+                  }
+              </script>";
+            } 
           }
         }
       }
@@ -114,45 +105,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           }else{
             $difference = $depositedAmount - $totalAmount;
             if ($difference == 0) {
-                $sqlInsert = "INSERT INTO split_bank_transactions_tb (transactionType, amount, detailsInsertID) VALUES (?, ?, ?)";
-                foreach ($_POST['amount'] as $amount) {
-                    $paramsInsert = array($transactionType, $amount, $detailsInsertID);
-                    $stmtInsert = sqlsrv_query($conn, $sqlInsert, $paramsInsert);
+              
+              $sqlInsert = "INSERT INTO split_bank_transactions_tb (transactionType, splitType, amount, detailsInsertID, accountCode, splitID, createdAt, accountDescription) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+              $splitTypes = $_POST['splitType'];
+              $amounts = $_POST['amount'];
+              $createdAt = date("Y-m-d H:i:s");
+              $splitID = bin2hex(random_bytes(6)); // to record amounts that were split at the same time, same as detailsInsertID
 
-                    if ($stmtInsert === false) {
-                        echo "Query: $sqlInsert<br>";  // Print the query for debugging
-                        die(print_r(sqlsrv_errors(), true));
-                    }
+              for ($i = 0; $i < count($amounts); $i++) {
+                $splitType = $splitTypes[$i];
+                $amount = $amounts[$i];
+                $selectedAccount = $_POST['selectedAccount'][$i]; // Access the selectedAccount corresponding to this split
+
+                // Split the selected value into accountCode and accountDescription
+                list($accountCode, $accountDescription) = explode('|', $selectedAccount);
+
+                $paramsInsert = array($transactionType, $splitType, $amount, $detailsInsertID, $accountCode, $splitID, $createdAt, $accountDescription);
+
+                $stmtInsert = sqlsrv_query($conn, $sqlInsert, $paramsInsert);
+                if ($stmtInsert === false) {
+                    echo "Query: $sqlInsert<br>";  // Print the query for debugging
+                    die(print_r(sqlsrv_errors(), true));
                 }
-                echo "
-                <script>
-                    var confirmResult = confirm('Transaction Split Successful');
-                    if (confirmResult) {
-                        window.location.href = 'importedBankDetails.php?success=true';
-                    }
-                </script>";
-            } else {
-                // Add the difference to the amounts array
-                $_POST['amount'][] = $difference;
+              }
+              echo "
+              <script>
+                  var confirmResult = confirm('Transaction Split Successful');
+                  if (confirmResult) {
+                      window.location.href = 'importedBankDetails.php?success=true';
+                  }
+              </script>";
 
-                $sqlInsert = "INSERT INTO split_bank_transactions_tb (transactionType, amount, detailsInsertID) VALUES (?, ?, ?)";
-                foreach ($_POST['amount'] as $amount) {
-                    $paramsInsert = array($transactionType, $amount, $detailsInsertID);
-                    $stmtInsert = sqlsrv_query($conn, $sqlInsert, $paramsInsert);
-
-                    if ($stmtInsert === false) {
-                        echo "Query: $sqlInsert<br>";  // Print the query for debugging
-                        die(print_r(sqlsrv_errors(), true));
-                    }
-                }
-                echo "
-                <script>
-                    var confirmResult = confirm('Transaction Split Successful');
-                    if (confirmResult) {
-                        window.location.href = 'importedBankDetails.php?success=true';
-                    }
-                </script>";
-            }
+            } 
           }
         }
       }
