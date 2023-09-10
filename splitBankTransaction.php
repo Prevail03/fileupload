@@ -44,21 +44,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           }else{
             $difference = $withdrawnAmount - $totalAmount;
             if ($difference == 0) {
-              $sqlInsert = "INSERT INTO split_bank_transactions_tb (transactionType, splitType, amount, detailsInsertID, accountCode, splitID, createdAt, accountDescription) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+              $sqlInsert = "INSERT INTO split_bank_transactions_tb (transactionType, splitType, amount, detailsInsertID, accountCode, splitID, createdAt, accountDescription, credit, debit) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
               $splitTypes = $_POST['splitType']; // Assuming this is the array of split types
               $amounts = $_POST['amount'];
               $createdAt = date("Y-m-d H:i:s"); 
-              $splitID=bin2hex(random_bytes(6)); //to record amountsThat were splitedAt the same time  same as detailsinsertID
+              $splitID=bin2hex(random_bytes(6));
+              $credit = 0;
+              $debit = 0;
+
               for ($i = 0; $i < count($amounts); $i++) {
                 $splitType = $splitTypes[$i];
                 $amount = $amounts[$i];
                 $selectedAccount = $_POST['selectedAccount'][$i]; // Access the selectedAccount corresponding to this split
-
+            
                 // Split the selected value into accountCode and accountDescription
                 list($accountCode, $accountDescription) = explode('|', $selectedAccount);
-
-                $paramsInsert = array($transactionType, $splitType, $amount, $detailsInsertID, $accountCode, $splitID, $createdAt, $accountDescription);
-
+            
+                if ($splitType === 'credit') {
+                    $credit = $amount; // Assign the amount to credit
+                    $debit = 0.00; // Ensure debit is 0
+                } else if ($splitType === 'debit') {
+                    $debit = $amount; // Assign the amount to debit
+                    $credit = 0.00; // Ensure credit is 0
+                }
+            
+                $paramsInsert = array($transactionType, $splitType, $amount, $detailsInsertID, $accountCode, $splitID, $createdAt, $accountDescription, $credit, $debit);
+            
                 $stmtInsert = sqlsrv_query($conn, $sqlInsert, $paramsInsert);
                 if ($stmtInsert === false) {
                     echo "Query: $sqlInsert<br>";  // Print the query for debugging
@@ -106,7 +117,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $difference = $depositedAmount - $totalAmount;
             if ($difference == 0) {
               
-              $sqlInsert = "INSERT INTO split_bank_transactions_tb (transactionType, splitType, amount, detailsInsertID, accountCode, splitID, createdAt, accountDescription) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+              $sqlInsert = "INSERT INTO split_bank_transactions_tb (transactionType, splitType, amount, detailsInsertID, accountCode, splitID, createdAt, accountDescription, credit, debit ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ? ,?)";
               $splitTypes = $_POST['splitType'];
               $amounts = $_POST['amount'];
               $createdAt = date("Y-m-d H:i:s");
@@ -116,12 +127,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $splitType = $splitTypes[$i];
                 $amount = $amounts[$i];
                 $selectedAccount = $_POST['selectedAccount'][$i]; // Access the selectedAccount corresponding to this split
-
+            
                 // Split the selected value into accountCode and accountDescription
                 list($accountCode, $accountDescription) = explode('|', $selectedAccount);
-
-                $paramsInsert = array($transactionType, $splitType, $amount, $detailsInsertID, $accountCode, $splitID, $createdAt, $accountDescription);
-
+            
+                if ($splitType === 'credit') {
+                    $credit = $amount; // Assign the amount to credit
+                    $debit = 0.00; // Ensure debit is 0
+                } else if ($splitType === 'debit') {
+                    $debit = $amount; // Assign the amount to debit
+                    $credit = 0.00; // Ensure credit is 0
+                }
+            
+                $paramsInsert = array($transactionType, $splitType, $amount, $detailsInsertID, $accountCode, $splitID, $createdAt, $accountDescription, $credit, $debit);
+            
                 $stmtInsert = sqlsrv_query($conn, $sqlInsert, $paramsInsert);
                 if ($stmtInsert === false) {
                     echo "Query: $sqlInsert<br>";  // Print the query for debugging

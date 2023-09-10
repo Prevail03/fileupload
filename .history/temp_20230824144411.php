@@ -3,23 +3,23 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 require 'vendor/autoload.php'; // Include the Composer autoloader
-require '../commons/config/settings.php';
-require './menu.php';
-$conn = sqlsrv_connect(Settings::$serverName, Settings::$connectionInfo);
+require('../commons/config/settings.php'); 
+require('./menu.php');
+$conn = sqlsrv_connect( Settings::$serverName, Settings::$connectionInfo);
 session_start();
-if (!isset($_SESSION['auth_code'])) {
-    header('location: ../logout.php');
-    exit('User not authenticated');
+if(!isset($_SESSION['auth_code'])){
+	header("location: ../logout.php");
+	exit("User not authenticated");
 }
-// Can access this module
-if ($_SESSION['accounts'] != 1) {
-    $_SESSION['module_error'] = 'You are not allowed to access this module';
-    header('location: ../modules.php');
-    exit;
+//Can access this module
+if($_SESSION['accounts'] != 1){
+	$_SESSION['module_error'] = "You are not allowed to access this module";
+	header("location: ../modules.php");
+	exit();
 }
-if ($_SESSION['user_folder'] !== Settings::$folder) {
-    header('location: ../logout.php');
-    exit('Folder inaccessible');
+if($_SESSION['user_folder'] !== Settings::$folder){
+	header("location: ../logout.php");
+	exit("Folder inaccessible");
 }
 ?>
 <!DOCTYPE html>
@@ -54,16 +54,16 @@ if ($_SESSION['user_folder'] !== Settings::$folder) {
           <img src="../commons/images/Octagon_logo.png" width="300" height="100"/>
         </div>
         <div class="col-sm-8">
-          <h2><?php echo $_SESSION['scheme_code'].': '.$_SESSION['scheme_name']; ?></h2>
+          <h2><?php echo($_SESSION['scheme_code'].": ".$_SESSION['scheme_name']); ?></h2>
           <h3>Accounts: Home</h3>
         </div>
       </div>
       
       <div class="row">
         <div class="col-sm-12">
-          <?php
-            print_menu(['menu-pos' => 'z', 'sub-menu-pos' => 'z1']);
-?>
+          <?php 
+            print_menu(array("menu-pos"=>"z", "sub-menu-pos"=>"z1"));
+          ?>
         </div>
       </div>
       
@@ -99,27 +99,27 @@ if ($_SESSION['user_folder'] !== Settings::$folder) {
                           <select name="selectedAccount[]" id="selectedAccount" required>
                               <option value="">Select Account</option>
                               <?php
-                    $schemeCode = $_SESSION['scheme_code'];
-$sqlAccounts = 'SELECT * FROM coa_tb WHERE coa_scheme_code LIKE ? ORDER BY coa_account_code';
-$paramsAccounts = [$schemeCode];
-$stmtAccounts = sqlsrv_query($conn, $sqlAccounts, $paramsAccounts);
-if ($stmtAccounts === false) {
-    exit(print_r(sqlsrv_errors(), true));
-}
-$counting = 1;
-// Check if selectedAccount is set in POST
-$selectedAccount = isset($_POST['selectedAccount']) ? $_POST['selectedAccount'] : '';
+                              $schemeCode = $_SESSION["scheme_code"];
+                              $sqlAccounts = "SELECT * FROM coa_tb WHERE coa_scheme_code LIKE ? ORDER BY coa_account_code";
+                              $paramsAccounts = array($schemeCode);
+                              $stmtAccounts = sqlsrv_query($conn, $sqlAccounts, $paramsAccounts);
+                              if ($stmtAccounts === false) {
+                                  die(print_r(sqlsrv_errors(), true));
+                              }
+                              $counting = 1;
+                              // Check if selectedAccount is set in POST
+                              $selectedAccount = isset($_POST['selectedAccount']) ? $_POST['selectedAccount'] : '';
 
-while ($rowAccounts = sqlsrv_fetch_array($stmtAccounts, SQLSRV_FETCH_ASSOC)) {
-    $accountCode = $rowAccounts['coa_account_code'];
-    $name = $rowAccounts['coa_account_name'];
+                              while ($rowAccounts = sqlsrv_fetch_array($stmtAccounts, SQLSRV_FETCH_ASSOC)) {
+                                  $accountCode = $rowAccounts['coa_account_code'];
+                                  $name = $rowAccounts['coa_account_name'];
 
-    // Check if the current option matches the selected value
-    $selected = ($selectedAccount == "$accountCode|$name") ? 'selected' : '';
+                                  // Check if the current option matches the selected value
+                                  $selected = ($selectedAccount == "$accountCode|$name") ? 'selected' : '';
 
-    echo "<option value='$accountCode|$name' $selected>$accountCode - $name</option>";
-}
-?>
+                                  echo "<option value='$accountCode|$name' $selected>$accountCode - $name</option>";
+                              }
+                              ?>
                           </select>
                       </div>
 
@@ -293,7 +293,9 @@ while ($rowAccounts = sqlsrv_fetch_array($stmtAccounts, SQLSRV_FETCH_ASSOC)) {
                             <thead>
                                 <tr>
                                     <th>#</th>
+                                    <th>Account Number</th>
                                     <th>Account Name</th>
+                                    <th>Address</th>
                                     <th>Currency</th>
                                     <th>Date</th>
                                     <th>Description</th>
@@ -304,79 +306,82 @@ while ($rowAccounts = sqlsrv_fetch_array($stmtAccounts, SQLSRV_FETCH_ASSOC)) {
                             </thead>
                             <tbody>
                                 <?php
-  $schemeCode = $_SESSION['scheme_code'];
-$sql = "SELECT * FROM BankTransactions WHERE schemeCode= ? and submisionStatus  like '%Not Submitted%' ORDER BY detailsInsertID ASC, createdAT ASC";
-$params = [$schemeCode];
-$stmt = sqlsrv_query($conn, $sql, $params);
-if ($stmt === false) {
-    exit(print_r(sqlsrv_errors(), true));
-}
-$counter = 1;
-while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
-    ?>
+                                $schemeCode = $_SESSION['scheme_code'];
+                                $sql = "SELECT * FROM BankTransactions WHERE schemeCode= ? and submisionStatus  like '%Not Submitted%' ORDER BY detailsInsertID ASC, createdAT ASC";
+                                $params = array($schemeCode);
+                                $stmt = sqlsrv_query($conn, $sql, $params);
+                                if ($stmt === false) {
+                                    die(print_r(sqlsrv_errors(), true));
+                                }
+                                $counter = 1;
+                                while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
+                                    ?>
                                     <tr>
-                                        <tr data-details-insert-id="<?php echo $row['detailsInsertID']; ?>">
-                                        <td><?php echo $counter++; ?></td>
-                                        
+                                        <!-- <tr data-details-insert-id="<?php //echo $row['detailsInsertID']; ?>"> -->
+                                        <td><?php echo $counter++ ?></td>
+                                        <td><?php echo $row['accountNumber'] ?></td>
                                         <td>
                                           <select name="selectedAccount[]">
                                               <?php
-              $schemeCode = $_SESSION['scheme_code'];
-    $sqlAccounts = 'SELECT * FROM coa_tb WHERE coa_scheme_code LIKE ? ORDER BY coa_account_code';
-    $paramsAccounts = [$schemeCode];
-    $stmtAccounts = sqlsrv_query($conn, $sqlAccounts, $paramsAccounts);
-    if ($stmtAccounts === false) {
-        exit(print_r(sqlsrv_errors(), true));
-    }
-    $counting = 1;
+                                              $schemeCode = $_SESSION["scheme_code"];
+                                              $sqlAccounts = "SELECT * FROM coa_tb WHERE coa_scheme_code LIKE ? ORDER BY coa_account_code";
+                                              $paramsAccounts = array($schemeCode);
+                                              $stmtAccounts = sqlsrv_query($conn, $sqlAccounts, $paramsAccounts);
+                                              if ($stmtAccounts === false) {
+                                                  die(print_r(sqlsrv_errors(), true));
+                                              }
+                                              $counting = 1;
 
-    // Check if selectedAccount is set in POST
-    $selectedAccounts = isset($_POST['selectedAccount']) ? $_POST['selectedAccount'] : [];
-    while ($rowAccounts = sqlsrv_fetch_array($stmtAccounts, SQLSRV_FETCH_ASSOC)) {
-        $accountCode = $rowAccounts['coa_account_code'];
-        $name = $rowAccounts['coa_account_name'];
+                                              // Check if selectedAccount is set in POST
+                                              $selectedAccounts = isset($_POST['selectedAccount']) ? $_POST['selectedAccount'] : array();
+                                              while ($rowAccounts = sqlsrv_fetch_array($stmtAccounts, SQLSRV_FETCH_ASSOC)) {
+                                                  $accountCode = $rowAccounts['coa_account_code'];
+                                                  $name = $rowAccounts['coa_account_name'];
+                                                  
+                                                  // Check if the current account is in the selectedAccounts array
+                                                  $selected = in_array("$accountCode|$name", $selectedAccounts) ? 'selected' : '';
 
-        // Check if the current account is in the selectedAccounts array
-        $selected = in_array("$accountCode|$name", $selectedAccounts) ? 'selected' : '';
-
-        echo "<option value='$accountCode|$name' $selected>$accountCode - $name</option>";
-    }
-    ?>
+                                                  echo "<option value='$accountCode|$name' $selected>$accountCode - $name</option>";
+                                              }
+                                              ?>
                                           </select>
                                         </td>
-                                        <td><?php echo $row['currency']; ?></td>
-                                        <td><?php echo date_format($row['date'], 'Y-m-d'); ?></td>
-                                        <td class="editable-cell" contenteditable="true" data-column="description"><?php echo $row['description']; ?></td>
-                                        <td><?php echo $row['withdrawal']; ?></td>
-                                        <td class="editable-cell" contenteditable="true" data-column="deposit"><?php echo $row['deposit']; ?></td>
+                                        <td><?php echo $row['address'] ?></td>
+                                        <td><?php echo $row['currency'] ?></td>
+                                        <td><?php echo date_format($row['date'], "Y-m-d") ?></td>
+                                        <td class="editable-cell" contenteditable="true" data-column="description"><?php echo $row['description'] ?></td>
+                                        <td><?php echo $row['withdrawal'] ?></td>
+                                        <td><?php echo $row['deposit'] ?></td>
                                         <input type="hidden" name="selectedRows[]" value="<?php echo $row['detailsInsertID']; ?>">
                                         <td>
                                             <?php
                                             $withdrawal = $row['withdrawal'];
-    $deposit = $row['deposit'];
-    $value = 0;
+                                            $deposit = $row['deposit'];
+                                            $value = 0;
 
-    if ($withdrawal > 0) {
-        $value = $withdrawal;
-    } elseif ($deposit > 0) {
-        $value = $deposit;
-    }
-    ?>
+                                            if ($withdrawal > 0) {
+                                                $value = $withdrawal;
+                                            } else if ($deposit > 0) {
+                                                $value = $deposit;
+                                            }
+                                            ?>
                                             <div class="btn-group">
-                                            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal" data-value="<?php echo $row['detailsInsertID']; ?>" data-another-value="<?php echo $value; ?>">Split Transactions</button>
-                                                <a class="btn btn-danger" href="deleteBankDetails.php?id=<?php echo $row['detailsInsertID']; ?>"
+                                            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal" data-value="<?php echo $row["detailsInsertID"]; ?>" data-another-value="<?php echo $value; ?>">Split Transactions</button>
+                                                <a class="btn btn-danger" href="deleteBankDetails.php?id=<?php echo  $row["detailsInsertID"]; ?>"
                                                     role="button">Delete</a>
                                             </div>
                                         </td>
                                     </tr>
                                     <?php
-}
-?>
+                                }
+                                ?>
                             </tbody>
                             <tfoot>
                                 <tr>
                                     <th>#</th>
+                                    <th>Account Number</th>
                                     <th>Account Name</th>
+                                    <th>Address</th>
                                     <th>Currency</th>
                                     <th>Date</th>
                                     <th>Description</th>
@@ -405,6 +410,9 @@ while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
                         <thead>
                         <tr>
                           <th>#</th>
+                          <th>Account Number</th>
+                          <th>Account Name</th>
+                          <th>Address</th>
                           <th>Date</th>
                           <th>Description</th>
                           <th>Amount</th>
@@ -414,34 +422,40 @@ while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
                         <tbody>
                         <?php
                           $schemeCode = $_SESSION['scheme_code'];
-$sql = "SELECT *, s.transactionType As transaction_type FROM BankTransactions b, split_bank_transactions_tb s WHERE b.schemeCode= ? and b.detailsInsertID = s.detailsInsertID  and b.submisionStatus  like '%Submitted%' and s.splitSubmissionStatus  like '%Not Submitted%' ORDER BY s.splitTransactionID ASC, s.createdAT ASC";
-$params = [$schemeCode];
-$stmt = sqlsrv_query($conn, $sql, $params);
-if ($stmt === false) {
-    exit(print_r(sqlsrv_errors(), true));
-}
-$counter = 1;
-while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {?>
+                          $sql = "SELECT *, s.transactionType As transaction_type FROM BankTransactions b, split_bank_transactions_tb s WHERE b.schemeCode= ? and b.detailsInsertID = s.detailsInsertID  and b.submisionStatus  like '%Submitted%' and s.splitSubmissionStatus  like '%Not Submitted%' ORDER BY s.splitTransactionID ASC, s.createdAT ASC";
+                          $params = array($schemeCode);
+                          $stmt = sqlsrv_query( $conn, $sql,$params);
+                          if( $stmt === false) {
+                              die( print_r( sqlsrv_errors(), true) );
+                          }
+                          $counter =1;
+                          while( $row = sqlsrv_fetch_array( $stmt, SQLSRV_FETCH_ASSOC) ) {?>
                             <tr>
-                              <td><?php echo $counter++; ?></td>
-                              <td><?php echo date_format($row['date'], 'Y-m-d'); ?></td>
-                              <td><?php echo $row['description']; ?></td>
-                              <td><?php echo $row['amount']; ?></td>
+                              <td><?php echo $counter++?></td>
+                              <td><?php echo $row['accountNumber']?></td>
+                              <td><?php echo $row['accountName']?></td>
+                              <td><?php echo $row['address']?></td>
+                              <td><?php echo date_format($row['date'], "Y-m-d") ?></td>
+                              <td><?php echo $row['description']?></td>
+                              <td><?php echo $row['amount']?></td>
                               <input type="hidden" name="selectedRowss[]" value="<?php echo $row['splitTransactionID']; ?>">
                               <td>
                               <div class="btn-group">
-                                <a class="btn btn-success" href="submitBankDetails.php?id=<?php echo $row['splitTransactionID']; ?>" role="button">Submit</a>
-                                <a class="btn btn-danger" href="deleteBankDetails.php?id=<?php echo $row['detailsInsertID']; ?>" role="button">Delete</a>
+                                <a class="btn btn-success" href="submitBankDetails.php?id=<?php echo $row["splitTransactionID"]; ?>" role="button">Submit</a>
+                                <a class="btn btn-danger" href="deleteBankDetails.php?id=<?php echo  $row["detailsInsertID"];?>" role="button">Delete</a>
                               </div>
                               </td>
                             </tr>
                           <?php
-}
-?>
+                          }
+                        ?>
                         </tbody>
                         <tfoot>
                         <tr>
-                          <th>#</th>                  
+                          <th>#</th>
+                          <th>Account Number</th>
+                          <th>Account Name</th>
+                          <th>Address</th>
                           <th>Date</th>
                           <th>Description</th>
                           <th>Amount</th>

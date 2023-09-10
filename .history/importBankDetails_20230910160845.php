@@ -88,13 +88,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     }
                 }
 
-                echo "
-                <script>
-                    var confirmResult = confirm('Insert Successful');
-                    if (confirmResult) {
-                        window.location.href = 'importBankDetails.php?success=true';
-                    }
-                </script>";
+                // echo "
+                // <script>
+                //     var confirmResult = confirm('Insert Successful');
+                //     if (confirmResult) {
+                //         window.location.href = 'importBankDetails.php?success=true';
+                //     }
+                // </script>";
             } catch (\Exception $e) {
                 echo "
                 <script>

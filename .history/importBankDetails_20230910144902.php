@@ -217,13 +217,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         exit(print_r(sqlsrv_errors(), true));
                     }
                 }
-                echo "
-                <script>
-                    var confirmResult = confirm('Insert Successful');
-                    if (confirmResult) {
-                        window.location.href = 'importBankDetails.php?success=true';
-                    }
-                </script>";
+                // echo "
+                // <script>
+                //     var confirmResult = confirm('Insert Successful');
+                //     if (confirmResult) {
+                //         window.location.href = 'importBankDetails.php?success=true';
+                //     }
+                // </script>";
             } catch (\Exception $e) {
                 echo "
                 <script>
@@ -307,7 +307,7 @@ if (!empty($custodyID)) {?>
             <form action="importBankDetails.php" method="post" enctype="multipart/form-data">
             <label for="filetype">File Type:<em>(Must be converted to Excel i.e .xlsx extension)</em></label>
             <select id="fileType" name="fileType">
-                <option value="stanchartPDF">Stan Chart PDF</option>
+                <option value="stanchartPdf">Stan Chart PDF</option>
                 <option value="stanchartExcel">Stan Chart Excel</option>
                 <option value="ncbaPDF">NCBA PDF</option>
             </select>

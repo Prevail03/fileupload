@@ -23,7 +23,6 @@ if ($_SESSION['user_folder'] !== Settings::$folder) {
 }
 use PhpOffice\PhpSpreadsheet\IOFactory;
 
-$schemeCode = $_SESSION['scheme_code'];
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($_FILES['file']['error'] === UPLOAD_ERR_OK) {
         $uploadedFilePath = $_FILES['file']['tmp_name'];
@@ -31,29 +30,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $selectedPeriod = $_POST['selected_period'];
         $selected_specification = $_POST['selected_specification'];
         $fileType = $_POST['fileType'];
-        if ($fileType === 'stanchartPDF') {
-            $schemeCountry = '';
-            $sqlSchemes = 'SELECT * FROM scheme_tb WHERE scheme_code LIKE ?';
-            $paramsSchemes = [$schemeCode];
-            $stmtSchemes = sqlsrv_query($conn, $sqlSchemes, $paramsSchemes);
-            if ($stmtSchemes === false) {
+        $schemeCode = $_SESSION['scheme_code'];
+
+        if ($fileType === 'stanchartPdf') {
+            $scheme_country = '';
+            $sql = 'SELECT * FROM scheme_tb WHERE scheme_code LIKE ?';
+            $params = [$scheme_code];
+            $stmt = sqlsrv_query($conn, $sql, $params);
+            if ($stmt === false) {
                 exit(print_r(sqlsrv_errors(), true));
             }
 
-            while ($rowSchemes = sqlsrv_fetch_array($stmtSchemes, SQLSRV_FETCH_ASSOC)) {
-                $schemeCountry = $rowSchemes['scheme_country'];
-            }
-            $currency = '';
-            if ($schemeCountry === 'Kenya') {
-                $currency = 'KES';
-            } elseif ($schemeCountry === 'Uganda') {
-                $currency = 'UGS';
-            } elseif ($schemeCountry === 'Zambia') {
-                $currency = 'ZMK';
-            } elseif ($schemeCountry === 'Tanzania') {
-                $currency = 'TSHS';
-            } else {
-                echo 'Invalid Country: '.$schemeCountry;
+            while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
             }
 
             try {
@@ -76,10 +64,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $withdrawal = $rowData[2];
                     $deposit = $rowData[3];
                     $balance = $rowData[4];
+                    $currency = 'KES';
                     $createdAt = date('Y-m-d H:i:s');
                     $selectedPeriods = $selectedPeriod;
                     $selectedSpecifications = $selected_specification;
-                    $SchemeCode = $schemeCode;
 
                     $params = [$bankDetailsID, $currency, $dateFormatted, $description, $withdrawal, $deposit, $balance, $schemeCode, $createdAt, $selectedPeriods, $selectedSpecifications];
                     $stmt = sqlsrv_query($conn, $sql, $params);
@@ -161,89 +149,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 echo 'An error occurred: '.$e->getMessage();
                 header('location:importBankDetails.php?insertfailure');
             }
-        } elseif ($fileType === 'ncbaPDF') {
-            $schemeCountry = '';
-            $sqlSchemes = 'SELECT * FROM scheme_tb WHERE scheme_code LIKE ?';
-            $paramsSchemes = [$schemeCode];
-            $stmtSchemes = sqlsrv_query($conn, $sqlSchemes, $paramsSchemes);
-            if ($stmtSchemes === false) {
-                exit(print_r(sqlsrv_errors(), true));
-            }
-
-            while ($rowSchemes = sqlsrv_fetch_array($stmtSchemes, SQLSRV_FETCH_ASSOC)) {
-                $schemeCountry = $rowSchemes['scheme_country'];
-            }
-            $currency = '';
-            if ($schemeCountry === 'Kenya') {
-                $currency = 'KES';
-            } elseif ($schemeCountry === 'Uganda') {
-                $currency = 'UGS';
-            } elseif ($schemeCountry === 'Zambia') {
-                $currency = 'ZMK';
-            } elseif ($schemeCountry === 'Tanzania') {
-                $currency = 'TSHS';
-            } else {
-                echo 'Invalid Country: '.$schemeCountry;
-            }
-
-            try {
-                $spreadsheet = IOFactory::load($excelFilePath);
-                $worksheet = $spreadsheet->getActiveSheet();
-                // Prepare the SQL INSERT query
-                $sql = 'INSERT INTO BankTransactions (bankDetailsID ,currency, date, description, withdrawal, deposit, balance, schemeCode, createdAt, selectedPeriod, selectedPeriodSpecification) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
-                date_default_timezone_set('Africa/Nairobi');
-                // Iterate through rows (starting from the second row to skip the header)
-                foreach ($worksheet->getRowIterator(2) as $row) {
-                    $rowData = [];
-                    foreach ($row->getCellIterator() as $cell) {
-                        $rowData[] = $cell->getValue(); // Extract cell values
-                    }
-                    // Convert Excel numeric date to human-readable date
-                    $bankDetailsID = bin2hex(random_bytes(6));
-                    $date = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($rowData[0]);
-                    $dateFormatted = $date->format('Y-m-d');
-                    $description = $rowData[3];
-                    $withdrawal = $rowData[4];
-                    $deposit = $rowData[5];
-                    $balance = $rowData[6];
-                    $createdAt = date('Y-m-d H:i:s');
-                    $selectedPeriods = $selectedPeriod;
-                    $selectedSpecifications = $selected_specification;
-                    $SchemeCode = $schemeCode;
-
-                    $params = [$bankDetailsID, $currency, $dateFormatted, $description, $withdrawal, $deposit, $balance, $schemeCode, $createdAt, $selectedPeriods, $selectedSpecifications];
-                    $stmt = sqlsrv_query($conn, $sql, $params);
-                    if ($stmt === false) {
-                        exit(print_r(sqlsrv_errors(), true));
-                    }
-                }
-                echo "
-                <script>
-                    var confirmResult = confirm('Insert Successful');
-                    if (confirmResult) {
-                        window.location.href = 'importBankDetails.php?success=true';
-                    }
-                </script>";
-            } catch (\Exception $e) {
-                echo "
-                <script>
-                    var confirmResult = confirm('Insert failed\n An error occurred: '.$e->getMessage()');
-                    if (confirmResult) {
-                        window.location.href = 'importBankDetails.php?success=FALSE';
-                    }
-                </script>";
-                echo 'An error occurred: '.$e->getMessage();
-                header('location:importBankDetails.php?insertfailure');
-            }
+        } elseif ($fileType === 'ncbaPdf') {
         } else {
             echo 'unknown file type ';
-            echo "
-                <script>
-                    var confirmResult = confirm('Unknown file template');
-                    if (confirmResult) {
-                        window.location.href = 'importBankDetails.php?success=false';
-                    }
-                </script>";
         }
     } else {
         echo 'An error occurred while uploading the file';
@@ -290,8 +198,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
 </br>
 <?php
-
-$schemeCode = $_SESSION['scheme_code'];
+    $schemeCode = $_SESSION['scheme_code'];
 $sqlBankCustody = 'SELECT * FROM bank_custody_tb WHERE schemeCode LIKE ?';
 $paramsBankCustody = [$schemeCode];
 $stmtBankCustody = sqlsrv_query($conn, $sqlBankCustody, $paramsBankCustody);
@@ -307,7 +214,7 @@ if (!empty($custodyID)) {?>
             <form action="importBankDetails.php" method="post" enctype="multipart/form-data">
             <label for="filetype">File Type:<em>(Must be converted to Excel i.e .xlsx extension)</em></label>
             <select id="fileType" name="fileType">
-                <option value="stanchartPDF">Stan Chart PDF</option>
+                <option value="stanchartPdf">Stan Chart PDF</option>
                 <option value="stanchartExcel">Stan Chart Excel</option>
                 <option value="ncbaPDF">NCBA PDF</option>
             </select>
@@ -333,8 +240,7 @@ if (!empty($custodyID)) {?>
       <form action="bankCustodySelection.php" method="post" enctype="multipart/form-data">
         <select name="selectedAccount">
           <?php
-
-    $schemeCode = $_SESSION['scheme_code'];
+      $schemeCode = $_SESSION['scheme_code'];
     $sqlAccounts = "SELECT * FROM coa_tb WHERE coa_scheme_code LIKE ? and coa_account_name like '%Custody%' ORDER BY coa_account_code";
     $paramsAccounts = [$schemeCode];
     $stmtAccounts = sqlsrv_query($conn, $sqlAccounts, $paramsAccounts);

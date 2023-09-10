@@ -38,7 +38,7 @@ if ($_SESSION['user_folder'] !== Settings::$folder) {
   <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"> -->
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
-
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
   <!-- Font Awesome -->
   <link rel="stylesheet" href="tables/plugins/fontawesome-free/css/all.min.css">
   <!-- DataTables -->
@@ -85,21 +85,20 @@ if ($_SESSION['user_folder'] !== Settings::$folder) {
                   <input type="hidden" id="modalValueInput" name="insertID">
                   <div class="modal-body">
                       <div id="transactionType">
-                          <div class="form-group">
-                              <label for="name">Transaction to be split:</label>
-                              <select id="transactionType" name="transactionType">
-                                  <option value="deposit">Deposit</option>
-                                  <option value="withdrawal">Withdrawal</option>
-                              </select>
-                          </div>
+                        <div class="form-group">
+                          <label for="name">Transaction to be split:</label>
+                          <select id="transactionType" name="transactionType">
+                            <option value="deposit">Deposit</option>
+                            <option value="withdrawal">Withdrawal</option>
+                          </select>
+                        </div>
                       </div>
-                      
                       <div id="accountCode">
-                          <label for="name">Account Code:</label>
-                          <select name="selectedAccount[]" id="selectedAccount" required>
-                              <option value="">Select Account</option>
-                              <?php
-                    $schemeCode = $_SESSION['scheme_code'];
+                        <label for="name">Account Code:</label>
+                        <select name="selectedAccount[]" id="selectedAccount" required>
+                          <option value="">Select Account</option> <!-- Add an empty option as a default -->
+                          <?php
+                            $schemeCode = $_SESSION['scheme_code'];
 $sqlAccounts = 'SELECT * FROM coa_tb WHERE coa_scheme_code LIKE ? ORDER BY coa_account_code';
 $paramsAccounts = [$schemeCode];
 $stmtAccounts = sqlsrv_query($conn, $sqlAccounts, $paramsAccounts);
@@ -107,6 +106,7 @@ if ($stmtAccounts === false) {
     exit(print_r(sqlsrv_errors(), true));
 }
 $counting = 1;
+
 // Check if selectedAccount is set in POST
 $selectedAccount = isset($_POST['selectedAccount']) ? $_POST['selectedAccount'] : '';
 
@@ -117,32 +117,29 @@ while ($rowAccounts = sqlsrv_fetch_array($stmtAccounts, SQLSRV_FETCH_ASSOC)) {
     // Check if the current option matches the selected value
     $selected = ($selectedAccount == "$accountCode|$name") ? 'selected' : '';
 
-    echo "<option value='$accountCode|$name' $selected>$accountCode - $name</option>";
+    echo "<option value='$accountCode|$name' $selected>$name</option>";
 }
 ?>
-                          </select>
+                        </select>
                       </div>
 
                       <div class="form-group">
-                          <label for="name">Transaction Type:</label>
-                          <select id="splitType" name="splitType[]">
-                              <option>Select</option>
-                              <option value="credit">Credit</option>
-                              <option value="debit">Debit</option>
-                          </select>
+                        <label for="name">Transaction Type:</label>
+                        <select id="splitType" name="splitType[]">
+                          <option >Select</option>
+                          <option value="credit">Credit</option>
+                          <option value="debit">Debit</option>
+                        </select>
                       </div>
 
                       <div id="amountFields">
-                          <div class="form-group">
-                              <label for="name">Amount:</label>
-                              <input type="number" class="form-control amount-input" name="amount[]"
-                                  placeholder="Amount" required>
-                          </div>
+                        <div class="form-group">
+                            <label for="name">Amount:</label>
+                            <input type="number" class="form-control amount-input" name="amount[]" placeholder="Amount" required>
+                        </div>
+                        
                       </div>
-                            
-                      
                       <button type="button" class="btn btn-success" id="addAmount">Add</button>
-                      <div class="amountFieldsWrapper"></div>
                   </div>
                   <div class="modal-footer">
                       <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -152,72 +149,70 @@ while ($rowAccounts = sqlsrv_fetch_array($stmtAccounts, SQLSRV_FETCH_ASSOC)) {
           </div>
       </div>
     </div>
+
 <script>
   $(document).ready(function () {
     $('#addAmount').on('click', function () {
-        var newField = $(
-            '<div class="amountFieldsWrapper">' +
-            '<div id="accountCode">' +
-            '<label for="name">Account Code:</label>' +
-            '<select name="selectedAccount[]" class="account-select" required>' +
-            '<option value="">Select Account</option>' +
-            '</select>' +
-            '</div>' + '<br/>' +
-            '<label for="name">Transaction Type:</label>' +
-            '<select class="split-type" name="splitType[]">' +
-            '<option>Select</option>' +
-            '<option value="credit">Credit</option>' +
-            '<option value="debit">Debit</option>' +
-            '</select>' +
-            '</div>' + '<br/>' +
-            '<div class="form-group">' +
-            '<label for="name">Amount:</label>' +
-            '<input type="number" class="form-control amount-input" name="amount[]" placeholder="Amount" required></br>' +
-            '<div class="form-group">' +
-            '<button type="button" class="btn btn-danger remove-amount" onclick="removeAmount()">Remove</button>' +
-            '</div>' +
-            '</div>'
-        );
+    var newField = $(
+      '<div id="accountCode">' +
+      '<label for="name">Account Code:</label>' +
+      '<select name="selectedAccount[]" class="account-select" required>' +
+      '<option value="">Select Account</option>' +
+      '</select>' +
+      '</div>' + '<br/>' +
+      '<label for="name">Transaction Type:</label>' +
+      '<select class="split-type" name="splitType[]">' +
+      '<option>Select</option>' +
+      '<option value="credit">Credit</option>' +
+      '<option value="debit">Debit</option>' +
+      '</select>' +
+      '</div>' + '<br/>' +
+      '<div class="form-group">' +
+      '<label for="name">Amount:</label>' +
+      '<input type="number" class="form-control amount-input" name="amount[]" placeholder="Amount" required></br>' +
+      '<div class="form-group">' +
+      '<button type="button" class="btn btn-danger remove-amount">Remove</button>' +
+      '</div>'
+    );
 
-        // AJAX to populate the account code select box
-        $.ajax({
-            url: 'fetch_accounts.php', // URL to your PHP script that fetches accounts
-            method: 'GET',
-            dataType: 'json',
-            success: function (data) {
-                var selectAccount = newField.find('.account-select');
-                selectAccount.empty();
-                selectAccount.append($('<option>', {
-                    value: '',
-                    text: 'Select Account'
-                }));
-                $.each(data, function (index, account) {
-                    selectAccount.append($('<option>', {
-                        value: account.code + '|' + account.name,
-                        text: account.code + ' - ' + account.name
-                    }));
-                });
-
-                // Set the selected option based on selectedAccount value
-                var selectedValue = account.code + '|' + account.name;
-                console.log(selectedValue);
-                selectAccount.val(selectedValue);
-            },
-            error: function (error) {
-                console.error(error);
-            }
+    // AJAX to populate the account code select box
+    $.ajax({
+      url: 'fetch_accounts.php', // URL to your PHP script that fetches accounts
+      method: 'GET',
+      dataType: 'json',
+      success: function (data) {
+        var selectAccount = newField.find('.account-select');
+        selectAccount.empty();
+        selectAccount.append($('<option>', {
+          value: '',
+          text: 'Select Account'
+        }));
+        $.each(data, function (index, account) {
+          selectAccount.append($('<option>', {
+            value: account.code + '|' + account.name,
+            text: account.name
+          }));
         });
 
-        $('#amountFields').append(newField);
-        updateSaveButtonState();
+        // Set the selected option based on selectedAccount value
+          var selectedValue = account.code + '|' + account.name ;
+          console.log(selectedValue);
+          selectAccount.val(selectedValue);
+        },
+        error: function (error) {
+          console.error(error);
+        }
+      });
+
+      $('#amountFields').append(newField);
+      updateSaveButtonState();
     });
 
-    function removeAmount() {
-  $(this).closest('.amountFieldsWrapper').remove();
-  updateSaveButtonState();
-}
 
-      
+      $(document).on('click', '.remove-amount', function () {
+        $(this).closest('.form-group').remove();
+        updateSaveButtonState();
+      });
 
       $('#myModal').on('show.bs.modal', function (event) {
           var button = $(event.relatedTarget);
@@ -293,7 +288,9 @@ while ($rowAccounts = sqlsrv_fetch_array($stmtAccounts, SQLSRV_FETCH_ASSOC)) {
                             <thead>
                                 <tr>
                                     <th>#</th>
+                                    <th>Account Number</th>
                                     <th>Account Name</th>
+                                    <th>Address</th>
                                     <th>Currency</th>
                                     <th>Date</th>
                                     <th>Description</th>
@@ -304,7 +301,7 @@ while ($rowAccounts = sqlsrv_fetch_array($stmtAccounts, SQLSRV_FETCH_ASSOC)) {
                             </thead>
                             <tbody>
                                 <?php
-  $schemeCode = $_SESSION['scheme_code'];
+      $schemeCode = $_SESSION['scheme_code'];
 $sql = "SELECT * FROM BankTransactions WHERE schemeCode= ? and submisionStatus  like '%Not Submitted%' ORDER BY detailsInsertID ASC, createdAT ASC";
 $params = [$schemeCode];
 $stmt = sqlsrv_query($conn, $sql, $params);
@@ -315,11 +312,10 @@ $counter = 1;
 while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
     ?>
                                     <tr>
-                                        <tr data-details-insert-id="<?php echo $row['detailsInsertID']; ?>">
                                         <td><?php echo $counter++; ?></td>
-                                        
+                                        <td><?php echo $row['accountNumber']; ?></td>
                                         <td>
-                                          <select name="selectedAccount[]">
+                                          <select name="selectedAccount[]"> <!-- Use [] to create an array -->
                                               <?php
               $schemeCode = $_SESSION['scheme_code'];
     $sqlAccounts = 'SELECT * FROM coa_tb WHERE coa_scheme_code LIKE ? ORDER BY coa_account_code';
@@ -339,16 +335,18 @@ while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
         // Check if the current account is in the selectedAccounts array
         $selected = in_array("$accountCode|$name", $selectedAccounts) ? 'selected' : '';
 
-        echo "<option value='$accountCode|$name' $selected>$accountCode - $name</option>";
+        echo "<option value='$accountCode|$name' $selected>$name</option>";
     }
     ?>
                                           </select>
-                                        </td>
+                                      </td>
+
+                                        <td><?php echo $row['address']; ?></td>
                                         <td><?php echo $row['currency']; ?></td>
                                         <td><?php echo date_format($row['date'], 'Y-m-d'); ?></td>
-                                        <td class="editable-cell" contenteditable="true" data-column="description"><?php echo $row['description']; ?></td>
+                                        <td><?php echo $row['description']; ?></td>
                                         <td><?php echo $row['withdrawal']; ?></td>
-                                        <td class="editable-cell" contenteditable="true" data-column="deposit"><?php echo $row['deposit']; ?></td>
+                                        <td><?php echo $row['deposit']; ?></td>
                                         <input type="hidden" name="selectedRows[]" value="<?php echo $row['detailsInsertID']; ?>">
                                         <td>
                                             <?php
@@ -376,7 +374,9 @@ while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
                             <tfoot>
                                 <tr>
                                     <th>#</th>
+                                    <th>Account Number</th>
                                     <th>Account Name</th>
+                                    <th>Address</th>
                                     <th>Currency</th>
                                     <th>Date</th>
                                     <th>Description</th>
@@ -405,6 +405,9 @@ while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
                         <thead>
                         <tr>
                           <th>#</th>
+                          <th>Account Number</th>
+                          <th>Account Name</th>
+                          <th>Address</th>
                           <th>Date</th>
                           <th>Description</th>
                           <th>Amount</th>
@@ -424,6 +427,9 @@ $counter = 1;
 while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {?>
                             <tr>
                               <td><?php echo $counter++; ?></td>
+                              <td><?php echo $row['accountNumber']; ?></td>
+                              <td><?php echo $row['accountName']; ?></td>
+                              <td><?php echo $row['address']; ?></td>
                               <td><?php echo date_format($row['date'], 'Y-m-d'); ?></td>
                               <td><?php echo $row['description']; ?></td>
                               <td><?php echo $row['amount']; ?></td>
@@ -441,7 +447,10 @@ while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {?>
                         </tbody>
                         <tfoot>
                         <tr>
-                          <th>#</th>                  
+                          <th>#</th>
+                          <th>Account Number</th>
+                          <th>Account Name</th>
+                          <th>Address</th>
                           <th>Date</th>
                           <th>Description</th>
                           <th>Amount</th>
@@ -484,40 +493,6 @@ while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {?>
 
   });
 </script>
-<script>
-  $(document).ready(function() {
-    // Add click event listener to the editable cells
-    $('.editable-cell').on('blur', function() {
-      // Get the updated value
-      var newValue = $(this).text().trim();
-
-      // Get the column name
-      var columnName = $(this).data('column');
-
-      // Get the fixture ID of the row
-      var detailsInsertID = $(this).closest('tr').data('details-insert-id');
-
-      // Send an AJAX request to update the value in the database
-      $.ajax({
-        url: 'updateTransactionDescription.php', // Replace with the actual update script
-        method: 'POST',
-        data: {
-          detailsInsertID: detailsInsertID,
-          columnName: columnName,
-          newValue: newValue
-        },
-        success: function(response) {
-          // Handle the response, such as displaying a success message
-          console.log('Value updated successfully');
-        },
-        error: function(xhr, status, error) {
-          // Handle the error, such as displaying an error message
-          console.error('Error updating value: ' + error);
-        }
-      });
-    });
-  });
-</script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
@@ -544,28 +519,21 @@ while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {?>
 <script src="tables/dist/js/demo.js"></script>
 <!-- Page specific script -->
 <script>
-$(document).ready(function() {
-  // Initialize DataTable for example1
-  var example1 = $("#example1").DataTable({
-    "responsive": true,
-    "lengthChange": false,
-    "autoWidth": false,
-    "buttons": ["copy", "csv", "excel", "pdf", "print", "colvis"]
+  $(function () {
+    $("#example1").DataTable({
+      "responsive": true, "lengthChange": false, "autoWidth": false,
+      "buttons": ["copy", "csv", "excel", "pdf", "print", "colvis"]
+    }).buttons().container().appendTo('#example1_wrapper .col-md-6:eq(0)');
+    $('#example2').DataTable({
+      "paging": true,
+      "lengthChange": false,
+      "searching": false,
+      "ordering": true,
+      "info": true,
+      "autoWidth": false,
+      "responsive": true,
+    });
   });
-  
-  example1.buttons().container().appendTo('#example1_wrapper .col-md-6:eq(0)');
-  example1.page.len(100).draw();
-  // Initialize DataTable for example2
-  var example2 = $('#example2').DataTable({
-    "paging": true,
-    "lengthChange": false,
-    "searching": false,
-    "ordering": true,
-    "info": true,
-    "autoWidth": false,
-    "responsive": true,
-  });
-});
 </script>
-</body>
+  </body>
 </html>

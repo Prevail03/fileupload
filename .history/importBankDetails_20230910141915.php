@@ -31,7 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $selectedPeriod = $_POST['selected_period'];
         $selected_specification = $_POST['selected_specification'];
         $fileType = $_POST['fileType'];
-        if ($fileType === 'stanchartPDF') {
+        if ($fileType === 'stanchartPdf') {
             $schemeCountry = '';
             $sqlSchemes = 'SELECT * FROM scheme_tb WHERE scheme_code LIKE ?';
             $paramsSchemes = [$schemeCode];
@@ -161,7 +161,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 echo 'An error occurred: '.$e->getMessage();
                 header('location:importBankDetails.php?insertfailure');
             }
-        } elseif ($fileType === 'ncbaPDF') {
+        } elseif ($fileType === 'ncbaPdf') {
             $schemeCountry = '';
             $sqlSchemes = 'SELECT * FROM scheme_tb WHERE scheme_code LIKE ?';
             $paramsSchemes = [$schemeCode];
@@ -202,10 +202,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $bankDetailsID = bin2hex(random_bytes(6));
                     $date = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($rowData[0]);
                     $dateFormatted = $date->format('Y-m-d');
-                    $description = $rowData[3];
-                    $withdrawal = $rowData[4];
-                    $deposit = $rowData[5];
-                    $balance = $rowData[6];
+                    $description = $rowData[1];
+                    $withdrawal = $rowData[2];
+                    $deposit = $rowData[3];
+                    $balance = $rowData[4];
                     $createdAt = date('Y-m-d H:i:s');
                     $selectedPeriods = $selectedPeriod;
                     $selectedSpecifications = $selected_specification;
@@ -217,6 +217,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         exit(print_r(sqlsrv_errors(), true));
                     }
                 }
+
                 echo "
                 <script>
                     var confirmResult = confirm('Insert Successful');
@@ -229,7 +230,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <script>
                     var confirmResult = confirm('Insert failed\n An error occurred: '.$e->getMessage()');
                     if (confirmResult) {
-                        window.location.href = 'importBankDetails.php?success=FALSE';
+                        window.location.href = 'importBankDetails.php?success=true';
                     }
                 </script>";
                 echo 'An error occurred: '.$e->getMessage();
@@ -237,13 +238,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         } else {
             echo 'unknown file type ';
-            echo "
-                <script>
-                    var confirmResult = confirm('Unknown file template');
-                    if (confirmResult) {
-                        window.location.href = 'importBankDetails.php?success=false';
-                    }
-                </script>";
         }
     } else {
         echo 'An error occurred while uploading the file';
@@ -307,7 +301,7 @@ if (!empty($custodyID)) {?>
             <form action="importBankDetails.php" method="post" enctype="multipart/form-data">
             <label for="filetype">File Type:<em>(Must be converted to Excel i.e .xlsx extension)</em></label>
             <select id="fileType" name="fileType">
-                <option value="stanchartPDF">Stan Chart PDF</option>
+                <option value="stanchartPdf">Stan Chart PDF</option>
                 <option value="stanchartExcel">Stan Chart Excel</option>
                 <option value="ncbaPDF">NCBA PDF</option>
             </select>

@@ -315,9 +315,9 @@ $counter = 1;
 while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
     ?>
                                     <tr>
-                                        <tr data-details-insert-id="<?php echo $row['detailsInsertID']; ?>">
+                                        <!-- <tr data-details-insert-id="<?php // echo $row['detailsInsertID'];?>"> -->
                                         <td><?php echo $counter++; ?></td>
-                                        
+                                        <td><?php echo $row['accountNumber']; ?></td>
                                         <td>
                                           <select name="selectedAccount[]">
                                               <?php
@@ -344,11 +344,12 @@ while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
     ?>
                                           </select>
                                         </td>
+                                        <td><?php echo $row['address']; ?></td>
                                         <td><?php echo $row['currency']; ?></td>
                                         <td><?php echo date_format($row['date'], 'Y-m-d'); ?></td>
                                         <td class="editable-cell" contenteditable="true" data-column="description"><?php echo $row['description']; ?></td>
                                         <td><?php echo $row['withdrawal']; ?></td>
-                                        <td class="editable-cell" contenteditable="true" data-column="deposit"><?php echo $row['deposit']; ?></td>
+                                        <td><?php echo $row['deposit']; ?></td>
                                         <input type="hidden" name="selectedRows[]" value="<?php echo $row['detailsInsertID']; ?>">
                                         <td>
                                             <?php
@@ -377,6 +378,7 @@ while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
                                 <tr>
                                     <th>#</th>
                                     <th>Account Name</th>
+                                    <th>Address</th>
                                     <th>Currency</th>
                                     <th>Date</th>
                                     <th>Description</th>
@@ -405,6 +407,9 @@ while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
                         <thead>
                         <tr>
                           <th>#</th>
+                          <th>Account Number</th>
+                          <th>Account Name</th>
+                          <th>Address</th>
                           <th>Date</th>
                           <th>Description</th>
                           <th>Amount</th>
@@ -424,6 +429,9 @@ $counter = 1;
 while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {?>
                             <tr>
                               <td><?php echo $counter++; ?></td>
+                              <td><?php echo $row['accountNumber']; ?></td>
+                              <td><?php echo $row['accountName']; ?></td>
+                              <td><?php echo $row['address']; ?></td>
                               <td><?php echo date_format($row['date'], 'Y-m-d'); ?></td>
                               <td><?php echo $row['description']; ?></td>
                               <td><?php echo $row['amount']; ?></td>
@@ -441,7 +449,10 @@ while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {?>
                         </tbody>
                         <tfoot>
                         <tr>
-                          <th>#</th>                  
+                          <th>#</th>
+                          <th>Account Number</th>
+                          <th>Account Name</th>
+                          <th>Address</th>
                           <th>Date</th>
                           <th>Description</th>
                           <th>Amount</th>

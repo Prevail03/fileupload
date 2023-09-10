@@ -348,7 +348,7 @@ while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
                                         <td><?php echo date_format($row['date'], 'Y-m-d'); ?></td>
                                         <td class="editable-cell" contenteditable="true" data-column="description"><?php echo $row['description']; ?></td>
                                         <td><?php echo $row['withdrawal']; ?></td>
-                                        <td class="editable-cell" contenteditable="true" data-column="deposit"><?php echo $row['deposit']; ?></td>
+                                        <td><?php echo $row['deposit']; ?></td>
                                         <input type="hidden" name="selectedRows[]" value="<?php echo $row['detailsInsertID']; ?>">
                                         <td>
                                             <?php
