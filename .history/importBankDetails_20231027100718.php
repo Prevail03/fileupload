@@ -106,7 +106,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 echo 'An error occurred: '.$e->getMessage();
                 header('location:importBankDetails.php?insertfailure');
             }
-            // stan Chart Excel
         } elseif ($fileType === 'stanchartExcel') {
             try {
                 $spreadsheet = IOFactory::load($excelFilePath);
@@ -162,7 +161,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 echo 'An error occurred: '.$e->getMessage();
                 header('location:importBankDetails.php?insertfailure');
             }
-            // /ncba
         } elseif ($fileType === 'ncbaPDF') {
             $schemeCountry = '';
             $sqlSchemes = 'SELECT * FROM scheme_tb WHERE scheme_code LIKE ?';
@@ -227,73 +225,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     }
                 </script>";
             } catch (\Exception $e) {
-                echo 'An error occurred: '.$e->getMessage();
-                header('location:importBankDetails.php?insertfailure');
-            }
-        } elseif ($fileType === 'coopbankExcel') {
-            $schemeCountry = '';
-            $sqlSchemes = 'SELECT * FROM scheme_tb WHERE scheme_code LIKE ?';
-            $paramsSchemes = [$schemeCode];
-            $stmtSchemes = sqlsrv_query($conn, $sqlSchemes, $paramsSchemes);
-            if ($stmtSchemes === false) {
-                exit(print_r(sqlsrv_errors(), true));
-            }
-
-            while ($rowSchemes = sqlsrv_fetch_array($stmtSchemes, SQLSRV_FETCH_ASSOC)) {
-                $schemeCountry = $rowSchemes['scheme_country'];
-            }
-            $currency = '';
-            if ($schemeCountry === 'Kenya') {
-                $currency = 'KES';
-            } elseif ($schemeCountry === 'Uganda') {
-                $currency = 'UGS';
-            } elseif ($schemeCountry === 'Zambia') {
-                $currency = 'ZMK';
-            } elseif ($schemeCountry === 'Tanzania') {
-                $currency = 'TSHS';
-            } else {
-                echo 'Invalid Country: '.$schemeCountry;
-            }
-
-            try {
-                $spreadsheet = IOFactory::load($excelFilePath);
-                $worksheet = $spreadsheet->getActiveSheet();
-                // Prepare the SQL INSERT query
-                $sql = 'INSERT INTO BankTransactions (bankDetailsID ,currency, date, description, withdrawal, deposit, balance, schemeCode, createdAt, selectedPeriod, selectedPeriodSpecification) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
-                date_default_timezone_set('Africa/Nairobi');
-                // Iterate through rows (starting from the second row to skip the header)
-                foreach ($worksheet->getRowIterator(2) as $row) {
-                    $rowData = [];
-                    foreach ($row->getCellIterator() as $cell) {
-                        $rowData[] = $cell->getValue(); // Extract cell values
-                    }
-                    // Convert Excel numeric date to human-readable date
-                    $bankDetailsID = bin2hex(random_bytes(6));
-                    $date = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($rowData[0]);
-                    $dateFormatted = $date->format('Y-m-d');
-                    $description = $rowData[1];
-                    $withdrawal = $rowData[4];
-                    $deposit = $rowData[5];
-                    $balance = $rowData[6];
-                    $createdAt = date('Y-m-d H:i:s');
-                    $selectedPeriods = $selectedPeriod;
-                    $selectedSpecifications = $selected_specification;
-                    $SchemeCode = $schemeCode;
-
-                    $params = [$bankDetailsID, $currency, $dateFormatted, $description, $withdrawal, $deposit, $balance, $schemeCode, $createdAt, $selectedPeriods, $selectedSpecifications];
-                    $stmt = sqlsrv_query($conn, $sql, $params);
-                    if ($stmt === false) {
-                        exit(print_r(sqlsrv_errors(), true));
-                    }
-                }
                 echo "
                 <script>
-                    var confirmResult = confirm('Insert Successful');
+                    var confirmResult = confirm('Insert failed\n An error occurred: '.$e->getMessage()');
                     if (confirmResult) {
-                        window.location.href = 'importBankDetails.php?success=true';
+                        window.location.href = 'importBankDetails.php?success=FALSE';
                     }
                 </script>";
-            } catch (\Exception $e) {
                 echo 'An error occurred: '.$e->getMessage();
                 header('location:importBankDetails.php?insertfailure');
             }
@@ -305,7 +243,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     if (confirmResult) {
                         window.location.href = 'importBankDetails.php?success=false';
                     }
-                </>";
+                </script>";
         }
     } else {
         echo 'An error occurred while uploading the file';
@@ -368,42 +306,39 @@ if (!empty($custodyID)) {?>
        <h1>File Upload</h1>
        <h2><strong><em>Housekeeping</em></strong></h2>
        <p>Stanchart PDF Format template format</p>
-        <ol>
-            <li>Date DD-MM-YYYY</li>
-            <li>Description(Transaction Description)</li>
-            <li>Withdrawal</li>
-            <li>Deposit </li>
-            <li>Balance</li>
+      <ol>
+        <li>1. Date DD-MM-YYYY</li>
+        <li>2. Description(Transaction Description)</li>
+        <li>3. Withdrawal</li>
+        <li>4. Deposit </li>
+        <li>5. Balance</li>
       </ol>
       <p>Stanchart Excel Template Format</p>
         <ol>
-            <li>Account Number</li>								
-            <li>Account Name</li>
-            <li>Address</li>
-            <li>Currency</li>
-            <li>Date</li>
-            <li>Description</li>
-            <li>Withdrawal</li>
-            <li>Deposit</li>
-            <li>Balance</li>
+        <li>1.Account Number</li>								
+        <li>2. Account Name</li>
+        <li>3. Address</li>
+        <li>4. Currency</li>
+        <li>5. Date</li>
+        <li>6. Description</li>
+        <li>7. Withdrawal</li>
+        <li>8. Deposit</li>
+        <li>9. Balance</li>
         </ol>
      <p>NCBA PDF Template</p>					
-        <ol>
-            <li>Date</li>
-            <li>ID</li>
-            <li>Category</li>
-            <li>Details</li>
-            <li>Debit</li>
-            <li>Credit</li>
-            <li>Balance</li> 
-        </ol> 
+        <li>1. Date</li>
+        <li>2. ID</li>
+        <li>3. Category</li>
+        <li>4. Details</li>
+        <li>5. Debit</li>
+        <li>6. Credit</li>
+        <li>7. Balance</li>  
             <form action="importBankDetails.php" method="post" enctype="multipart/form-data">
             <label for="filetype">File Type:<em>(Must be converted to Excel i.e .xlsx extension)</em></label>
             <select id="fileType" name="fileType">
                 <option value="stanchartPDF">Stan Chart PDF</option>
                 <option value="stanchartExcel">Stan Chart Excel</option>
                 <option value="ncbaPDF">NCBA PDF</option>
-                <option value="coopbankExcel">Coop Bank Excel </option>
             </select>
             <br>
             <label for="period">Select Period:</label>

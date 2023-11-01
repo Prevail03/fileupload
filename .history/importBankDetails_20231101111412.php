@@ -230,7 +230,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 echo 'An error occurred: '.$e->getMessage();
                 header('location:importBankDetails.php?insertfailure');
             }
-        } elseif ($fileType === 'coopbankExcel') {
+        } elseif ($fileType === '') {
             $schemeCountry = '';
             $sqlSchemes = 'SELECT * FROM scheme_tb WHERE scheme_code LIKE ?';
             $paramsSchemes = [$schemeCode];
@@ -271,7 +271,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $bankDetailsID = bin2hex(random_bytes(6));
                     $date = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($rowData[0]);
                     $dateFormatted = $date->format('Y-m-d');
-                    $description = $rowData[1];
+                    $description = $rowData[3];
                     $withdrawal = $rowData[4];
                     $deposit = $rowData[5];
                     $balance = $rowData[6];

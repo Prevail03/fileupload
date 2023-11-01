@@ -315,7 +315,7 @@ $counter = 1;
 while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
     ?>
                                     <tr>
-                                        <tr data-details-insert-id="<?php echo $row['detailsInsertID']; ?>">
+                                    <input type="hidden" class="detailsInsertID" value="<?php echo $row['detailsInsertID']; ?>">
                                         <td><?php echo $counter++; ?></td>
                                         
                                         <td>
@@ -495,7 +495,7 @@ while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {?>
       var columnName = $(this).data('column');
 
       // Get the fixture ID of the row
-      var detailsInsertID = $(this).closest('tr').data('details-insert-id');
+      var detailsInsertID = $(this).closest('tr').find('.detailsInsertID').val();
 
       // Send an AJAX request to update the value in the database
       $.ajax({
@@ -544,28 +544,28 @@ while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {?>
 <script src="tables/dist/js/demo.js"></script>
 <!-- Page specific script -->
 <script>
-$(document).ready(function() {
-  // Initialize DataTable for example1
-  var example1 = $("#example1").DataTable({
-    "responsive": true,
-    "lengthChange": false,
-    "autoWidth": false,
-    "buttons": ["copy", "csv", "excel", "pdf", "print", "colvis"]
+  $(document).ready(function() {
+    // Initialize DataTable for example1
+    var example1 = $("#example1").DataTable({
+      "responsive": true,
+      "lengthChange": false,
+      "autoWidth": false,
+      "buttons": ["copy", "csv", "excel", "pdf", "print", "colvis"]
+    });
+    
+    example1.buttons().container().appendTo('#example1_wrapper .col-md-6:eq(0)');
+    example1.page.len(100).draw();
+    // Initialize DataTable for example2
+    var example2 = $('#example2').DataTable({
+      "paging": true,
+      "lengthChange": false,
+      "searching": false,
+      "ordering": true,
+      "info": true,
+      "autoWidth": false,
+      "responsive": true,
+    });
   });
-  
-  example1.buttons().container().appendTo('#example1_wrapper .col-md-6:eq(0)');
-  example1.page.len(100).draw();
-  // Initialize DataTable for example2
-  var example2 = $('#example2').DataTable({
-    "paging": true,
-    "lengthChange": false,
-    "searching": false,
-    "ordering": true,
-    "info": true,
-    "autoWidth": false,
-    "responsive": true,
-  });
-});
 </script>
 </body>
 </html>
